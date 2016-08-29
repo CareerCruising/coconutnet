@@ -5,8 +5,18 @@ using RestSharp.Authenticators;
 
 namespace Coconut
 {
-	public class CoconutAPI
-	{
+    public interface ICoconutAPI
+    {
+        /// <summary>
+        /// Create a Job
+        /// </summary>
+        /// <param name="data">A string representing the config content</param>
+        /// <returns>CoconutJob instance</returns>
+        CoconutJob Submit(string data);
+    }
+
+    public class CoconutAPI : ICoconutAPI
+    {
 	    private RestClient _cli;
 
 		/// <summary>
