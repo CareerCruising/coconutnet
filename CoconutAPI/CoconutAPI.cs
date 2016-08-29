@@ -1,48 +1,47 @@
-using System;
 using RestSharp;
-using System.Web.Script.Serialization;
-using System.Collections.Generic;
 using System.Net;
+using Newtonsoft.Json;
+using RestSharp.Authenticators;
 
 namespace Coconut
 {
 	public class CoconutAPI
 	{
-		RestClient Cli;
-		JavaScriptSerializer Json;
+	    private RestClient _cli;
 
 		/// <summary>
-		/// Create an CoconutClient instance
+		/// Create an CoconutAPI instance
 		/// </summary>
-		/// <param name="APIKey"></param>
+		/// <param name="apiKey"></param>
 		/// <example>
-		/// CoconutClient Coconut = new CoconutClient("k-myapikey");
+		/// CoconutAPI Coconut = new CoconutAPI("k-myapikey");
 		/// </example>
-		public CoconutAPI (string APIKey)
+		public CoconutAPI (string apiKey)
 		{
-			Cli = new RestClient("https://api.coconut.co");
-			Cli.Authenticator = new HttpBasicAuthenticator(APIKey, "");
-			Cli.AddDefaultHeader("Accept", "application/json");
-			Cli.UserAgent = "Coconut/2.0.0 (dotnet)";
-
-			Json = new JavaScriptSerializer();
+		    _cli = new RestClient("https://api.coconut.co")
+		    {
+		        Authenticator = new HttpBasicAuthenticator(apiKey, "")
+		    };
+		    _cli.AddDefaultHeader("Accept", "application/json");
+			_cli.UserAgent = "Coconut/2.0.0 (dotnet)";
 		}
 
 
+		/// <summary>
 		/// Create a Job
 		/// </summary>
-		/// <param name="Data">A string representing the config content</param>
+		/// <param name="data">A string representing the config content</param>
 		/// <returns>CoconutJob instance</returns>
-		public CoconutJob Submit(string Data)
+		public CoconutJob Submit(string data)
 		{
-			return Json.Deserialize<CoconutJob>(Request("v1/job", Method.POST, Data));
+			return JsonConvert.DeserializeObject<CoconutJob>(Request("v1/job", Method.POST, data));
 		}
 
-		private string Request(string path, RestSharp.Method method, string Data) {
+		private string Request(string path, RestSharp.Method method, string data) {
 			var request = new RestRequest(path, method);
-			request.AddParameter("text/plain", Data, ParameterType.RequestBody);
+			request.AddParameter("text/plain", data, ParameterType.RequestBody);
 
-			RestResponse response = Cli.Execute(request);
+			var response = _cli.Execute(request);
 			var code = response.StatusCode;
 
 			if(code == HttpStatusCode.Created || code == HttpStatusCode.OK || code == HttpStatusCode.NoContent)
@@ -51,7 +50,7 @@ namespace Coconut
 			}
 			else
 			{
-				string ErrorMessage = Json.Deserialize<CoconutError> (response.Content).Message;
+				var ErrorMessage = JsonConvert.DeserializeObject<CoconutError> (response.Content).Message;
 				throw new CoconutException(ErrorMessage);
 			}
 
