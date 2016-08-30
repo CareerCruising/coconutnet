@@ -47,7 +47,8 @@ namespace Coconut
 			return JsonConvert.DeserializeObject<CoconutJob>(Request("v1/job", Method.POST, data));
 		}
 
-		private string Request(string path, RestSharp.Method method, string data) {
+		private string Request(string path, RestSharp.Method method, string data)
+        {
 			var request = new RestRequest(path, method);
 			request.AddParameter("text/plain", data, ParameterType.RequestBody);
 
@@ -60,8 +61,8 @@ namespace Coconut
 			}
 			else
 			{
-				var ErrorMessage = JsonConvert.DeserializeObject<CoconutError> (response.Content).Message;
-				throw new CoconutException(ErrorMessage);
+				var errorMessage = JsonConvert.DeserializeObject<CoconutError> (response.Content).Message;
+				throw new CoconutException(errorMessage);
 			}
 
 		}
